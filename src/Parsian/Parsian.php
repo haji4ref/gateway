@@ -4,11 +4,12 @@ namespace Larabookir\Gateway\Parsian;
 
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rules\In;
+use Larabookir\Gateway\Restable;
 use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
 
-class Parsian extends PortAbstract implements PortInterface {
+class Parsian extends PortAbstract implements PortInterface, Restable {
 
     /**
      * Url of parsian gateway web service
@@ -204,5 +205,31 @@ class Parsian extends PortAbstract implements PortInterface {
         $this->cardNumber = $result->ConfirmPaymentResult->CardNumberMasked;
         $this->transactionSucceed();
         $this->newLog($result->ConfirmPaymentResult->Status, ParsianResult::errorMessage($result->ConfirmPaymentResult->Status));
+    }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return $url = $this->gateUrl . $this->refId();
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [
+            'LoginAccount'   => $this->config->get('gateway.parsian.pin'),
+            'Amount'         => $this->amount . "",
+            'OrderId'        => $this->transactionId(),
+            'CallBackUrl'    => $this->getCallback(),
+            'AdditionalData' => ""
+        ];
     }
 }
