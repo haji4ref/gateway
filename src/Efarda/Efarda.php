@@ -10,7 +10,8 @@ use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
 use Larabookir\Gateway\Restable;
 
-class Efarda extends PortAbstract implements PortInterface, Restable {
+class Efarda extends PortAbstract implements PortInterface, Restable
+{
 
     protected $mobileNumber;
 
@@ -33,7 +34,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
     private function getApiClient()
     {
         $config = [];
-        if(env('PROXY_ENABLE')) {
+        if (env('PROXY_ENABLE')) {
             $config['proxy'] = 'http://' .
                 env('PROXY_USER') .
                 ':' .
@@ -108,10 +109,10 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
      */
     public function getCallback()
     {
-        if( ! $this->callbackUrl)
+        if (!$this->callbackUrl)
             $this->callbackUrl = $this->config->get('gateway.efarda.callback-url');
 
-        return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
+        return env('APP_URL') . $this->callbackUrl;
     }
 
     /**
@@ -143,7 +144,6 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
         $this->gateUrl = $params['url'];
 
         $this->gateParams['Token'] = $params['Token'];
-
     }
 
     /**
@@ -191,7 +191,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
 
             $body = json_decode($res->getBody()->getContents(), true);
 
-            if($body['result'] !== "0") {
+            if ($body['result'] !== "0") {
                 $errorMessage = EfardaResult::errorMessage(intval($body['result']));
 
                 $this->transactionFailed();
@@ -204,7 +204,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
 
                 $status = intval($body['result']);
 
-                if($traceNumber && $status == 0) {
+                if ($traceNumber && $status == 0) {
                     $this->refId = $traceNumber;
 
                     $this->transactionSetRefId();
@@ -212,14 +212,13 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
                     return $traceNumber;
                 }
             }
-        } catch(ClientException $exception) {
+        } catch (ClientException $exception) {
             $this->transactionFailed();
 
             $this->newLog($exception->getCode(), $exception->getMessage());
 
             throw new EfardaErrorException('مشکلی در ارتباط با درگاه پیش آمده لطفا از درگاه دیگری استفاده کنید', $exception->getCode());
         }
-
     }
 
     /**
@@ -250,7 +249,6 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
             'url'   => $this->findURL($body),
             'Token' => $this->findToken($body)
         ];
-
     }
 
     /**
@@ -279,14 +277,13 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
             $res = $client->post($this->baseApi . 'ipgPurchaseVerify', $params);
 
             $body = json_decode($res->getBody()->getContents(), true);
-
-        } catch(\Exception $e) {
-            throw new EfardaErrorException($e->getMessage(), - 1);
+        } catch (\Exception $e) {
+            throw new EfardaErrorException($e->getMessage(), -1);
         }
 
-        if( ! $body)
-            throw new EfardaErrorException('پاسخ دریافتی از بانک نامعتبر است.', - 1);
-        if($body['result'] != 0) {
+        if (!$body)
+            throw new EfardaErrorException('پاسخ دریافتی از بانک نامعتبر است.', -1);
+        if ($body['result'] != 0) {
             $errorMessage = Request::input('desc');;
             $this->transactionFailed();
             $this->newLog($body['result'], $errorMessage);
@@ -360,22 +357,21 @@ class Efarda extends PortAbstract implements PortInterface, Restable {
      */
     private function verifyPayment($transaction)
     {
-        if( ! Request::has('traceNumber') && ! Request::has('result'))
-            throw new EfardaErrorException('درخواست غیر معتبر', - 1);
+        if (!Request::has('traceNumber') && !Request::has('result'))
+            throw new EfardaErrorException('درخواست غیر معتبر', -1);
 
         $traceNumber = Request::input('traceNumber');
         $result = intval(Request::input('result'));
 
-        if($result != 0) {
+        if ($result != 0) {
             $errorMessage = Request::input('desc');
             $this->newLog($result, $errorMessage);
             throw new EfardaErrorException($errorMessage, $result);
         }
 
-        if($this->refId != $traceNumber)
-            throw new EfardaErrorException('تراکنشی یافت نشد', - 1);
+        if ($this->refId != $traceNumber)
+            throw new EfardaErrorException('تراکنشی یافت نشد', -1);
 
         $this->doVerify($traceNumber);
-
     }
 }
