@@ -365,7 +365,7 @@ abstract class PortAbstract
 	 */
 	protected function makeCallback($url, array $query)
 	{
-		return $this->url_modify(array_merge($query, ['_token' => csrf_token()]), secure_url($url));
+		return $this->url_modify(array_merge($query, ['_token' => csrf_token()]), env('APP_ENV') === 'production' ? secure_url($url) : url($url));
 	}
 
 	/**
