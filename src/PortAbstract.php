@@ -1,4 +1,5 @@
 <?php
+
 namespace Larabookir\Gateway;
 
 use Illuminate\Support\Facades\Request;
@@ -93,8 +94,8 @@ abstract class PortAbstract
 	}
 
 	/** bootstraper */
-	function boot(){
-
+	function boot()
+	{
 	}
 
 	function setConfig($config)
@@ -145,7 +146,7 @@ abstract class PortAbstract
 	 *
 	 * @return void
 	 */
-	function setCustomDesc ($description)
+	function setCustomDesc($description)
 	{
 		$this->description = $description;
 	}
@@ -155,7 +156,7 @@ abstract class PortAbstract
 	 *
 	 * @return string | null
 	 */
-	function getCustomDesc ()
+	function getCustomDesc()
 	{
 		return $this->description;
 	}
@@ -167,7 +168,7 @@ abstract class PortAbstract
 	 *
 	 * @return void
 	 */
-	function setCustomInvoiceNo ($invoiceNo)
+	function setCustomInvoiceNo($invoiceNo)
 	{
 		$this->customInvoiceNo = $invoiceNo;
 	}
@@ -177,7 +178,7 @@ abstract class PortAbstract
 	 *
 	 * @return string | null
 	 */
-	function getCustomInvoiceNo ()
+	function getCustomInvoiceNo()
 	{
 		return $this->customInvoiceNo;
 	}
@@ -256,10 +257,10 @@ abstract class PortAbstract
 
 	function getTimeId()
 	{
-		$genuid = function(){
-			return substr(str_pad(str_replace('.','', microtime(true)),12,0),0,12);
+		$genuid = function () {
+			return substr(str_pad(str_replace('.', '', microtime(true)), 12, 0), 0, 12);
 		};
-		$uid=$genuid();
+		$uid = $genuid();
 		while ($this->getTable()->whereId($uid)->first())
 			$uid = $genuid();
 		return $uid;
@@ -288,26 +289,26 @@ abstract class PortAbstract
 		return $this->transactionId;
 	}
 
-    /**
-     * Commit transaction
-     * Set status field to success status
-     *
-     * @param array $fields
-     * @return mixed
-     */
+	/**
+	 * Commit transaction
+	 * Set status field to success status
+	 *
+	 * @param array $fields
+	 * @return mixed
+	 */
 	protected function transactionSucceed(array $fields = [])
 	{
-	    $updateFields = [
-            'status' => Enum::TRANSACTION_SUCCEED,
-            'tracking_code' => $this->trackingCode,
-            'card_number' => $this->cardNumber,
-            'payment_date' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ];
+		$updateFields = [
+			'status' => Enum::TRANSACTION_SUCCEED,
+			'tracking_code' => $this->trackingCode,
+			'card_number' => $this->cardNumber,
+			'payment_date' => Carbon::now(),
+			'updated_at' => Carbon::now(),
+		];
 
-	    if (!empty($fields)) {
-	        $updateFields = array_merge($updateFields, $fields);
-        }
+		if (!empty($fields)) {
+			$updateFields = array_merge($updateFields, $fields);
+		}
 
 		return $this->getTable()->whereId($this->transactionId)->update($updateFields);
 	}
@@ -337,7 +338,6 @@ abstract class PortAbstract
 			'ref_id' => $this->refId,
 			'updated_at' => Carbon::now(),
 		]);
-
 	}
 
 	/**
@@ -365,7 +365,7 @@ abstract class PortAbstract
 	 */
 	protected function makeCallback($url, array $query)
 	{
-		return $this->url_modify(array_merge($query, ['_token' => csrf_token()]), url($url));
+		return $this->url_modify(array_merge($query, ['_token' => csrf_token()]), secure_url($url));
 	}
 
 	/**
@@ -389,9 +389,9 @@ abstract class PortAbstract
 		}
 
 		return (!empty($url_array['scheme']) ? $url_array['scheme'] . '://' : null) .
-		(!empty($url_array['host']) ? $url_array['host'] : null) .
-		(!empty($url_array['port']) ? ':' . $url_array['port'] : null) .
-        (!empty($url_array['path']) ? $url_array['path'] : null) .
-        '?' . http_build_query($query_array);
+			(!empty($url_array['host']) ? $url_array['host'] : null) .
+			(!empty($url_array['port']) ? ':' . $url_array['port'] : null) .
+			(!empty($url_array['path']) ? $url_array['path'] : null) .
+			'?' . http_build_query($query_array);
 	}
 }
