@@ -112,7 +112,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
         if (!$this->callbackUrl)
             $this->callbackUrl = $this->config->get('gateway.efarda.callback-url');
 
-        return env('APP_URL') . $this->callbackUrl;
+        return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
 
     /**
