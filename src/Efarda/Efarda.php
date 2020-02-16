@@ -17,6 +17,12 @@ class Efarda extends PortAbstract implements PortInterface, Restable
 
     protected $baseApi = 'https://mpg.ba24.ir/mpg/api/';
 
+    protected $traceApi = 'ipgGetTraceId';
+
+    protected $purchaseApi = 'ipgPurchase';
+
+    protected $verifyApi = 'ipgPurchaseVerify';
+
     /**
      * Address of gate for redirect
      *
@@ -31,7 +37,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
      *
      * @return \GuzzleHttp\Client
      */
-    private function getApiClient()
+    protected function getApiClient()
     {
         $config = [];
         if (env('PROXY_ENABLE')) {
@@ -187,7 +193,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
             ]
         ];
         try {
-            $res = $client->post($this->baseApi . 'ipgGetTraceId', $params);
+            $res = $client->post($this->baseApi . $this->traceApi, $params);
 
             $body = json_decode($res->getBody()->getContents(), true);
 
@@ -243,7 +249,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
             ]
         ];
 
-        $body = $client->post($this->baseApi . 'ipgPurchase', $params)->getBody()->getContents();
+        $body = $client->post($this->baseApi . $this->purchaseApi, $params)->getBody()->getContents();
 
         return [
             'url'   => $this->findURL($body),
@@ -258,7 +264,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
      *
      * @throws \Larabookir\Gateway\Efarda\EfardaErrorException
      */
-    private function doVerify($traceNumber)
+    protected function doVerify($traceNumber)
     {
         $client = $this->getApiClient();
 
@@ -274,7 +280,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
         ];
 
         try {
-            $res = $client->post($this->baseApi . 'ipgPurchaseVerify', $params);
+            $res = $client->post($this->baseApi . $this->verifyApi, $params);
 
             $body = json_decode($res->getBody()->getContents(), true);
         } catch (\Exception $e) {
@@ -355,7 +361,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
      *
      * @throws \Larabookir\Gateway\Efarda\EfardaErrorException
      */
-    private function verifyPayment($transaction)
+    protected function verifyPayment($transaction)
     {
         if (!Request::has('traceNumber') && !Request::has('result'))
             throw new EfardaErrorException('درخواست غیر معتبر', -1);
@@ -364,6 +370,7 @@ class Efarda extends PortAbstract implements PortInterface, Restable
         $result = intval(Request::input('result'));
 
         if ($result != 0) {
+
             $errorMessage = Request::input('desc');
             $this->newLog($result, $errorMessage);
             throw new EfardaErrorException($errorMessage, $result);

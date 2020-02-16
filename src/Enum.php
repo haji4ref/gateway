@@ -2,9 +2,11 @@
 
 namespace Larabookir\Gateway;
 
-class Enum {
+class Enum
+{
 
     const EFARDA = 'EFARDA';
+    const EFARDAV2 = 'EFARDAV2';
     const MELLAT = 'MELLAT';
     const SADAD = 'SADAD';
     const ZARINPAL = 'ZARINPAL';
@@ -33,7 +35,7 @@ class Enum {
             'TRANSACTION_FAILED_TEXT',
         ];
 
-        if(function_exists('array_except'))
+        if (function_exists('array_except'))
             return array_values(array_except($reflect->getConstants(), $excepts));
         else
             return array_values(\Illuminate\Support\Arr::except($reflect->getConstants(), $excepts));
@@ -56,5 +58,4 @@ class Enum {
      */
     const TRANSACTION_FAILED = 'FAILED';
     const TRANSACTION_FAILED_TEXT = 'عملیات پرداخت با خطا مواجه شد.';
-
 }
